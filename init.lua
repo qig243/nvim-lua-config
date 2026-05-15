@@ -181,6 +181,7 @@ require("lazy").setup({
 				"rcarriga/nvim-notify",
 				opts = {
 					background_colour = "#000000",
+					top_down = false, -- stack from bottom-right
 					on_open = function(win)
 						vim.api.nvim_win_set_config(win, { focusable = false })
 					end,
@@ -248,7 +249,7 @@ require("lazy").setup({
 		-- { "windwp/nvim-autopairs",           event = "InsertEnter",                 opts = { disable_filetype = { "TelescopePrompt", "vim" } } },
 
 		-- information
-		{ "kevinhwang91/nvim-bqf",           ft = "qf" },
+		{ "kevinhwang91/nvim-bqf", ft = "qf" },
 	},
 
 	-- diagnostics, references, etc
