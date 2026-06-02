@@ -33,7 +33,6 @@ opt.splitbelow = true
 opt.scrolloff = 4
 opt.sidescrolloff = 10
 opt.ttyfast = true
-opt.lazyredraw = false -- avoid issue in noice
 
 -- search
 opt.ignorecase = true
@@ -98,9 +97,6 @@ keymap.set("n", "]b", "<cmd>bnext<CR>")
 -- clipboard
 keymap.set("v", "Y", '"+y')
 
--- filetype
--- keymap.set("n", "<leader>ft", "<cmd>set ft=")
-
 -- command mode and insert mode emacs-style {
 keymap.set("c", "<c-b>", "<left>")
 keymap.set("c", "<c-f>", "<right>")
@@ -122,14 +118,8 @@ keymap.set("i", "jk", "<esc>")
 
 -- faster scroll
 keymap.set("n", "<c-e>", "2<c-e>")
-keymap.set("n", "<c-y>", "2<c-y>")
 
 keymap.set("n", "<leader>wr", "<cmd>set wrap<cr>")
--- " customize placeholder _TODO_
--- " nnoremap <leader><c-t> a_TODO_<esc>
--- nnoremap <leader><c-t> b/_TODO_<cr><cmd>nohl<cr>"_c6l
--- nnoremap <leader>tt b/_TODO_<cr><cmd>nohl<cr>"_c6l
--- inoremap <c-t> <esc>/_TODO_<cr><cmd>nohl<cr>"_c6l
 
 -- tab
 keymap.set("n", "tu", "<cmd>tabe<cr>")
@@ -147,7 +137,7 @@ keymap.set("n", "<leader>py", "<cmd>call RunPython()<cr>")
 --
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
 	vim.fn.system({
 		"git", "clone", "--filter=blob:none",
 		"https://github.com/folke/lazy.nvim.git", "--branch=stable",
@@ -223,7 +213,7 @@ require("lazy").setup({
 		-- increment
 		{
 			"monaqa/dial.nvim",
-			events = "VeryLazy",
+			event = "VeryLazy",
 			keys = {
 				{ "<c-a>", mode = { "n", "v" }, "<Plug>(dial-increment)" },
 				{ "<c-x>", mode = { "n", "v" }, "<Plug>(dial-decrement)" },
@@ -245,8 +235,6 @@ require("lazy").setup({
 				})
 			end,
 		},
-
-		-- { "windwp/nvim-autopairs",           event = "InsertEnter",                 opts = { disable_filetype = { "TelescopePrompt", "vim" } } },
 
 		-- information
 		{ "kevinhwang91/nvim-bqf", ft = "qf" },

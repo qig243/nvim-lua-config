@@ -69,7 +69,7 @@ return {
 			require("mini.icons").setup()
 			MiniIcons.mock_nvim_web_devicons()
 
-			-- Align (replace vim-table-mode / tabular)
+			-- Align (replace vim-easy-align / tabular). Note: vim-table-mode handles live markdown table editing.
 			require("mini.align").setup()
 
 			-- Cursorword (replace vim-illuminate)

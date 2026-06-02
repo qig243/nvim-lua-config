@@ -1,29 +1,16 @@
+-- LSP servers are installed via system pkg manager (brew):
+--   brew install lua-language-server pyright rust-analyzer marksman \
+--                sql-language-server typescript-language-server yaml-language-server
+-- gopls is installed via `go install golang.org/x/tools/gopls@latest`
 return {
 	{
 		"neovim/nvim-lspconfig",
 		event = { "BufReadPre", "BufNewFile" },
-		dependencies = { "williamboman/mason-lspconfig.nvim" },
 		keys = {
-			{ "<C-]>",      vim.lsp.buf.definition },  -- gd
-			{ "gi",         vim.lsp.buf.implementation }, -- gI
-			{ "<leader>rn", vim.lsp.buf.rename },      -- cr
+			{ "<C-]>",      vim.lsp.buf.definition },
+			{ "gi",         vim.lsp.buf.implementation },
+			{ "<leader>rn", vim.lsp.buf.rename },
 			{ "<leader>D",  vim.lsp.buf.type_definition },
-			-- { "<leader>do", vim.diagnostic.open_float }, -- wrong cmd
-
-			-- lazyvim already included some keys https://www.lazyvim.org/keymaps#lsp
-			-- { "gD", vim.lsp.buf.declaration },
-			-- { "gd", vim.lsp.buf.definition },
-			-- { "[d", vim.diagnostic.goto_prev },
-			-- { "]d", vim.diagnostic.goto_next },
-			-- { "gr", vim.lsp.buf.references },
-			-- { "K", vim.lsp.buf.hover },
-			-- { "<C-k>", vim.lsp.buf.signature_help },
-		},
-		opts = {
-			inlay_hints = {
-				enabled = true,
-				exclude = {},
-			},
 		},
 		config = function()
 			-- Ensure blink.cmp capabilities are used
@@ -51,14 +38,15 @@ return {
 			setup_server('marksman')
 			setup_server('pyright')
 			setup_server('rust_analyzer')
+			setup_server('sqlls')
+			setup_server('ts_ls')
+			setup_server('yamlls')
 
 			-- Go
 			setup_server('gopls', {
 				cmd = { "gopls" },
 				filetypes = { "go", "gomod", "gowork", "gotmpl" },
-				root_dir = function(fname)
-					return require("lspconfig.util").root_pattern("go.work", "go.mod", ".git")(fname) or vim.fs.dirname(vim.fs.find('.git', { path = fname, upward = true })[1])
-				end,
+				root_dir = require("lspconfig.util").root_pattern("go.work", "go.mod", ".git"),
 				settings = {
 					gopls = {
 						hints = {
@@ -92,39 +80,5 @@ return {
 				end,
 			})
 		end,
-	},
-
-	{
-		"williamboman/mason.nvim",
-		event = "VeryLazy",
-		cmd = { "Mason", "MasonUpdate" },
-		build = "<cmd>MasonUpdate", -- :MasonUpdate updates registry contents
-		opts = {
-			ui = {
-				icons =
-				{ package_installed = "✓", package_pending = "➜", package_uninstalled = "✗" }
-			}
-		},
-	},
-
-	{
-		"williamboman/mason-lspconfig.nvim", -- a bridge between mason.nvim and lspconfig
-		event = "VeryLazy",
-		dependencies = { "williamboman/mason.nvim" },
-		opts = {
-			ensure_installed = {
-				"gopls",     -- golang
-				-- "jqls",      -- json
-				"lua_ls",    -- lua
-				"marksman",  -- markdown
-				"pyright",   -- python
-				"rust_analyzer", -- rust
-				"sqlls",     -- sql
-				"ts_ls",     -- ts
-				-- "typst_lsp", -- typst
-				"yamlls",    -- yaml
-			},
-			automatic_installation = true,
-		},
 	},
 }

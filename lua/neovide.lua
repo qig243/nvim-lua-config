@@ -18,8 +18,8 @@ if vim.g.neovide then
   keymap.set('i', '<D-v>', '<ESC>l"+Pli') -- Paste insert mode
 
   -- Allow clipboard copy paste in neovim
-  vim.api.nvim_set_keymap('', '<D-v>', '+p<CR>', { noremap = true, silent = true })
-  vim.api.nvim_set_keymap('!', '<D-v>', '<C-R>+', { noremap = true, silent = true })
-  vim.api.nvim_set_keymap('t', '<D-v>', '<C-R>+', { noremap = true, silent = true })
-  vim.api.nvim_set_keymap('v', '<D-v>', '<C-R>+', { noremap = true, silent = true })
+  keymap.set('', '<D-v>', '+p<CR>', { noremap = true, silent = true })
+  keymap.set('!', '<D-v>', '<C-R>+', { noremap = true, silent = true })
+  keymap.set('t', '<D-v>', '<C-R>+', { noremap = true, silent = true })
+  keymap.set('v', '<D-v>', '<C-R>+', { noremap = true, silent = true })
 end

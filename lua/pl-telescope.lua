@@ -10,14 +10,6 @@ return {
 				require("telescope").load_extension("fzf")
 			end,
 		},
-		{
-			"nvim-tree/nvim-web-devicons",
-			dependencies = { "junegunn/fzf.vim" },
-			build = "make",
-			config = function()
-				require("telescope").load_extension("fzf")
-			end
-		},
 	},
 	cmd = "Telescope",
 	keys = {

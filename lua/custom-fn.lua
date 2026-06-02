@@ -1,4 +1,4 @@
-vim.api.nvim_exec([[
+vim.api.nvim_exec2([[
   command! TidyJIRA call TidyJIRAFunc()
   function! TidyJIRAFunc()
     :set ft=markdown
@@ -6,9 +6,9 @@ vim.api.nvim_exec([[
     :%s/\(SPPC-\d\{5\}\)\s*\nSPPC-\d\{5\}\s*/[[\1](https:\/\/jira.shopee.io\/browse\/\1)] /
     :%s/$/  /
   endfunc
-]], true)
+]], {})
 
-vim.api.nvim_exec([[
+vim.api.nvim_exec2([[
 func! RunVimRun()
   :w
   if &filetype == 'sh'
@@ -45,9 +45,9 @@ func! RunVimRun()
     :term scala %
   endif
 endfunc
-]], true)
+]], {})
 
-vim.api.nvim_exec([[
+vim.api.nvim_exec2([[
 func! RunVimTest()
   :w
   if &filetype == 'sh'
@@ -56,7 +56,7 @@ func! RunVimTest()
     :GoTestFile -v
   endif
 endfunc
-]], true)
+]], {})
 
 function RunPython()
   -- Get current buffer lines

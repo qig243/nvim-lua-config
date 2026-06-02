@@ -5,12 +5,6 @@ return {
 		keys = { { "<leader>tm", "<cmd>TableModeToggle<cr>" } },
 	},
 	{
-		"sustech-data/wildfire.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
-		opts = {},
-	},
-	{
 		"stevearc/conform.nvim",
 		event = { "BufWritePre" },
 		cmd = { "ConformInfo" },
