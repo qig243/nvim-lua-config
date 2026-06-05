@@ -21,5 +21,4 @@ return {
 			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
 		},
 	},
-	{ "nacro90/numb.nvim", config = function() require("numb").setup() end },
 }

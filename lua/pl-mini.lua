@@ -3,6 +3,39 @@ return {
 	{
 		"echasnovski/mini.nvim",
 		event = "VeryLazy",
+		keys = {
+			-- mini.pick / mini.extra
+			{
+				"<leader>ff",
+				function()
+					-- Start in preview view by feeding the default toggle_preview key (<Tab>).
+					vim.api.nvim_create_autocmd("User", {
+						pattern = "MiniPickStart",
+						once = true,
+						callback = function()
+							vim.schedule(function() vim.api.nvim_input("<Tab>") end)
+						end,
+					})
+					require("mini.pick").builtin.files()
+				end,
+				desc = "Find files (preview)",
+			},
+			{ "<leader>fg", function() require("mini.pick").builtin.grep_live() end,                            desc = "Live grep" },
+			{ "<leader>fb", function() require("mini.pick").builtin.buffers() end,                              desc = "Buffers" },
+			{ "<leader>fh", function() require("mini.pick").builtin.help() end,                                 desc = "Help" },
+			{ "<leader>fr", function() require("mini.pick").builtin.resume() end,                               desc = "Resume" },
+			{ "<leader>fo", function() require("mini.extra").pickers.oldfiles() end,                            desc = "Oldfiles" },
+			{ "<leader>fc", function() require("mini.extra").pickers.commands() end,                            desc = "Commands" },
+			{ "<leader>fm", function() require("mini.extra").pickers.marks() end,                               desc = "Marks" },
+			{ "<leader>ft", function() require("mini.extra").pickers.options() end,                             desc = "Options" },
+
+			{ "<leader>sf", function() require("mini.pick").builtin.grep_live() end,                            desc = "Live grep" },
+			{ "<leader>bb", function() require("mini.pick").builtin.buffers() end,                              desc = "Buffers" },
+			{ "<leader>dd", function() require("mini.extra").pickers.diagnostic() end,                          desc = "Diagnostics" },
+			{ "<leader>ts", function() require("mini.extra").pickers.treesitter() end,                          desc = "Treesitter" },
+			{ "gr",         function() require("mini.extra").pickers.lsp({ scope = "references" }) end,         desc = "LSP references" },
+			{ "gb",         function() require("mini.extra").pickers.git_branches() end,                        desc = "Git branches" },
+		},
 		config = function()
 			-- Comment
 			require("mini.comment").setup({
@@ -80,6 +113,95 @@ return {
 
 			-- AI (replace wildfire.nvim)
 			require("mini.ai").setup()
+
+			-- Pick (replace telescope.nvim)
+			require("mini.pick").setup({
+				mappings = {
+					move_down = "<C-n>",
+					move_up = "<C-p>",
+				},
+				window = {
+					config = function()
+						local height = math.floor(0.8 * vim.o.lines)
+						local width = math.floor(0.8 * vim.o.columns)
+						return {
+							anchor = "NW",
+							height = height,
+							width = width,
+							row = math.floor(0.5 * (vim.o.lines - height)),
+							col = math.floor(0.5 * (vim.o.columns - width)),
+						}
+					end,
+				},
+			})
+
+			-- Extra pickers for mini.pick (oldfiles, marks, diagnostics, lsp, git_branches, ...)
+			require("mini.extra").setup()
+
+			-- Use mini.pick as the vim.ui.select handler
+			vim.ui.select = require("mini.pick").ui_select
+
+			-- Statusline (replace lualine.nvim)
+			require("mini.statusline").setup({
+				use_icons = true,
+			})
+
+			-- Starter (replace vim-startify)
+			local starter = require("mini.starter")
+
+			-- Find VCS root for cwd, falling back to cwd itself.
+			local function project_root()
+				local found = vim.fs.find({ ".git" }, {
+					upward = true,
+					path = vim.fn.getcwd(),
+					stop = vim.uv.os_homedir(),
+				})
+				if found[1] then return vim.fs.dirname(found[1]) end
+				return vim.fn.getcwd()
+			end
+
+			-- Recent files under the current repo (mimics startify_change_to_vcs_root=1).
+			local function recent_in_repo(n)
+				return function()
+					local root = project_root() .. "/"
+					local items = {}
+					for _, path in ipairs(vim.v.oldfiles or {}) do
+						if vim.startswith(path, root) and vim.fn.filereadable(path) == 1 then
+							table.insert(items, {
+								name = vim.fn.fnamemodify(path, ":~:."),
+								action = "edit " .. vim.fn.fnameescape(path),
+								section = "Recent files (this repo)",
+							})
+							if #items >= n then break end
+						end
+					end
+					return items
+				end
+			end
+
+			starter.setup({
+				header = function()
+					return "Neovim    " .. vim.fn.fnamemodify(project_root(), ":~")
+				end,
+				items = {
+					recent_in_repo(20),
+					starter.sections.recent_files(20, false, true),
+					starter.sections.builtin_actions(),
+				},
+				content_hooks = {
+					starter.gen_hook.adding_bullet(),
+					starter.gen_hook.aligning("center", "center"),
+				},
+			})
+
+			-- Notify (replace nvim-notify)
+			require("mini.notify").setup({
+				window = {
+					config = { border = "rounded" },
+					winblend = 0,
+				},
+			})
+			vim.notify = require("mini.notify").make_notify()
 
 			-- Clue (replace which-key.nvim)
 			local miniclue = require("mini.clue")
