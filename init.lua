@@ -90,10 +90,6 @@ keymap.set("n", "<esc>", "<cmd>nohl<CR>")
 keymap.set("n", "Q", "<nop>")
 keymap.set("n", "<c-q>", "<nop>")
 
--- buffer
-keymap.set("n", "[b", "<cmd>bprevious<CR>")
-keymap.set("n", "]b", "<cmd>bnext<CR>")
-
 -- clipboard
 keymap.set("v", "Y", '"+y')
 

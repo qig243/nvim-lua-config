@@ -75,7 +75,15 @@ File: `init.lua` editing block
 
 ## Suggested rollout order
 
-1. **Phase 1 (low risk, quick weight reduction):** statusline + starter + notify → mini equivalents.
-2. **Phase 2 (bigger):** telescope → mini.pick + mini.extra (or fzf-lua).
-3. **Phase 3 (additions):** mini.bracketed, mini.move, mini.hipatterns, mini.bufremove.
-4. **Phase 4 (optional consolidation):** evaluate snacks.nvim as a single umbrella for the folke-stack pieces.
+1. **Phase 1 — DONE** (commit `4bf98a5`): statusline + starter + notify → mini equivalents.
+2. **Phase 2 — DONE** (commit `4bf98a5`): telescope → mini.pick + mini.extra; dropped numb + nvim-bqf; `<leader>ff` opens in preview view.
+3. **Phase 3 — DONE**: mini.bracketed, mini.move, mini.hipatterns, mini.bufremove. Removed manual `[b/]b` from init.lua (handled by bracketed). Added `<leader>bd / <leader>bw` for buffer remove.
+4. **Phase 4 (optional, deferred):** evaluate snacks.nvim — skipped for now since the mini equivalents work and consolidating would re-introduce a heavy dependency.
+
+## Still open (not yet applied)
+
+- **mini.files** — alternative to oil.nvim; keep oil for now (buffer-edit UX is preferred).
+- **mini.git** — could trim vim-fugitive usage; defer until fugitive feels heavy.
+- **mini.operators** — evaluate/exchange/multiply/replace/sort. Easy add when wanted.
+- **grug-far.nvim** — modern project search/replace UI. Add when needed.
+- **tiny-inline-diagnostic.nvim** — `virtual_lines = { current_line = true }` is already set in `builtin.lua`; revisit only if styling feels lacking.

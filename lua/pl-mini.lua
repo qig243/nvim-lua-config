@@ -35,6 +35,10 @@ return {
 			{ "<leader>ts", function() require("mini.extra").pickers.treesitter() end,                          desc = "Treesitter" },
 			{ "gr",         function() require("mini.extra").pickers.lsp({ scope = "references" }) end,         desc = "LSP references" },
 			{ "gb",         function() require("mini.extra").pickers.git_branches() end,                        desc = "Git branches" },
+
+			-- mini.bufremove
+			{ "<leader>bd", function() require("mini.bufremove").delete() end,                                  desc = "Delete buffer (keep window)" },
+			{ "<leader>bw", function() require("mini.bufremove").wipeout() end,                                 desc = "Wipeout buffer (keep window)" },
 		},
 		config = function()
 			-- Comment
@@ -113,6 +117,27 @@ return {
 
 			-- AI (replace wildfire.nvim)
 			require("mini.ai").setup()
+
+			-- Bracketed: [b/]b, [d/]d, [q/]q, [c/]c, ... (also supersedes manual [b/]b mappings)
+			require("mini.bracketed").setup()
+
+			-- Move lines/blocks via <M-h/j/k/l>
+			require("mini.move").setup()
+
+			-- Hipatterns: highlight hex colors + TODO/FIXME/etc.
+			local hipatterns = require("mini.hipatterns")
+			hipatterns.setup({
+				highlighters = {
+					fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+					hack  = { pattern = "%f[%w]()HACK()%f[%W]",  group = "MiniHipatternsHack" },
+					todo  = { pattern = "%f[%w]()TODO()%f[%W]",  group = "MiniHipatternsTodo" },
+					note  = { pattern = "%f[%w]()NOTE()%f[%W]",  group = "MiniHipatternsNote" },
+					hex_color = hipatterns.gen_highlighter.hex_color(),
+				},
+			})
+
+			-- Buffer remove: delete buffer without closing the window split
+			require("mini.bufremove").setup()
 
 			-- Pick (replace telescope.nvim)
 			require("mini.pick").setup({
