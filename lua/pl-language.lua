@@ -1,12 +1,11 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		event = { "BufReadPre", "BufNewFile" },
-		priority = 1000,
+		branch = "main", -- master does not support Neovim 0.12+
+		lazy = false, -- main branch does not support lazy-loading
 		build = ":TSUpdate",
-		opts = {
-			-- add languages
-			ensure_installed = {
+		config = function()
+			require("nvim-treesitter").install({
 				"bash", "query",
 				"c", "cpp",
 				"dockerfile",
@@ -20,31 +19,18 @@ return {
 				"regex",
 				"vim", "vimdoc",
 				"yaml",
-			},
-			ignore_install = { "org" },
-			auto_install = true,
+			})
 
-			highlight = { enable = true, disable = {} },
-			indent = { enable = true },
-			rainbow = {
-				enable = true,
-				extended_mode = true,
-				max_file_lines = nil,
-			},
-		},
-		config = function()
-			require('nvim-treesitter.install').compilers = { 'gcc' }
-			require 'nvim-treesitter.configs'.setup {
-				incremental_selection = {
-					enable = true,
-					keymaps = {
-						init_selection = "gnn", -- set to `false` to disable one of the mappings
-						node_incremental = "gnn",
-						scope_incremental = "grc",
-						node_decremental = "gnr",
-					},
-				},
-			}
+			-- Highlighting and indentation are enabled per-buffer on the main branch.
+			vim.api.nvim_create_autocmd("FileType", {
+				callback = function(args)
+					local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+					if lang and pcall(vim.treesitter.language.add, lang) then
+						vim.treesitter.start(args.buf, lang)
+						vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+					end
+				end,
+			})
 		end,
 	},
 	{ -- golang
