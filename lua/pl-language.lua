@@ -1,6 +1,10 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
+		-- Pin to the classic `master` branch: this config uses the master API
+		-- (nvim-treesitter.configs / .install, :TSUpdate, ensure_installed).
+		-- The plugin's new default `main` branch has an incompatible API.
+		branch = "master",
 		event = { "BufReadPre", "BufNewFile" },
 		priority = 1000,
 		build = ":TSUpdate",
@@ -32,19 +36,20 @@ return {
 				max_file_lines = nil,
 			},
 		},
-		config = function()
+		config = function(_, opts)
 			require('nvim-treesitter.install').compilers = { 'gcc' }
-			require 'nvim-treesitter.configs'.setup {
-				incremental_selection = {
-					enable = true,
-					keymaps = {
-						init_selection = "gnn", -- set to `false` to disable one of the mappings
-						node_incremental = "gnn",
-						scope_incremental = "grc",
-						node_decremental = "gnr",
-					},
+			-- Merge the incremental-selection keymaps into the opts table above and
+			-- apply the whole thing (ensure_installed / highlight / indent included).
+			opts.incremental_selection = {
+				enable = true,
+				keymaps = {
+					init_selection = "gnn", -- set to `false` to disable one of the mappings
+					node_incremental = "gnn",
+					scope_incremental = "grc",
+					node_decremental = "gnr",
 				},
 			}
+			require('nvim-treesitter.configs').setup(opts)
 		end,
 	},
 	{ -- golang

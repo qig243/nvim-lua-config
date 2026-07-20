@@ -46,7 +46,11 @@ return {
 			setup_server('gopls', {
 				cmd = { "gopls" },
 				filetypes = { "go", "gomod", "gowork", "gotmpl" },
-				root_dir = require("lspconfig.util").root_pattern("go.work", "go.mod", ".git"),
+				-- Native vim.lsp (nvim 0.11+) resolves the project root from these
+				-- markers. The old `lspconfig.util.root_pattern(...)` returns a
+				-- root-finder with the pre-0.11 signature, which the native client
+				-- never invokes correctly, so gopls would silently never start.
+				root_markers = { "go.work", "go.mod", ".git" },
 				settings = {
 					gopls = {
 						hints = {
