@@ -80,10 +80,22 @@ File: `init.lua` editing block
 3. **Phase 3 — DONE**: mini.bracketed, mini.move, mini.hipatterns, mini.bufremove. Removed manual `[b/]b` from init.lua (handled by bracketed). Added `<leader>bd / <leader>bw` for buffer remove.
 4. **Phase 4 (optional, deferred):** evaluate snacks.nvim — skipped for now since the mini equivalents work and consolidating would re-introduce a heavy dependency.
 
-## Still open (not yet applied)
+## Phase 5 — DONE (2026-08-25)
 
-- **mini.files** — alternative to oil.nvim; keep oil for now (buffer-edit UX is preferred).
-- **mini.git** — could trim vim-fugitive usage; defer until fugitive feels heavy.
-- **mini.operators** — evaluate/exchange/multiply/replace/sort. Easy add when wanted.
+- nvim-treesitter `master` → `main` branch (nvim 0.12). Needs `brew install tree-sitter-cli`.
+  Incremental selection `gnn`/`gnr` reimplemented natively (`grc` scope-increment dropped).
+- vim-fugitive → `mini.git` (`:Git` still works; new `<leader>g{b,l,L,d,s,h,o}` keys).
+- trouble.nvim → `mini.extra` pickers on the same keys (`<leader>xx/xX/cs/cl/xL/xQ`, plus `<leader>cS`).
+- Added `mini.operators` (`g=` eval, `cx` exchange, `gm` multiply, `gR` replace, `gs` sort),
+  `mini.indentscope`, `mini.misc` (restore cursor), `mini.files` (`<leader>ef`), `mini.tabline`.
+- Claude Code: `coder/claudecode.nvim` (IDE protocol; `/ide` in a tmux `claude` attaches;
+  `<leader>a*` keys). Ctrl-G prompt temp files open as wrapped markdown with `textwidth=0`.
+- Fixes: `maplocalleader` typo, nvim-metals never attached, dead `ttyfast`/`rainbow`,
+  unused providers disabled (clean `:checkhealth`).
+
+## Still open
+
 - **grug-far.nvim** — modern project search/replace UI. Add when needed.
+- **mini.jump2d / mini.jump** — flash.nvim kept instead (better UX).
+- **mini.cmdline** (new) — cmdline completion; try later.
 - **tiny-inline-diagnostic.nvim** — `virtual_lines = { current_line = true }` is already set in `builtin.lua`; revisit only if styling feels lacking.

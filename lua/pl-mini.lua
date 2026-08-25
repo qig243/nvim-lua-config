@@ -36,6 +36,34 @@ return {
 			{ "gr",         function() require("mini.extra").pickers.lsp({ scope = "references" }) end,         desc = "LSP references" },
 			{ "gb",         function() require("mini.extra").pickers.git_branches() end,                        desc = "Git branches" },
 
+			-- diagnostics / symbols / lists (replaces trouble.nvim, same keys)
+			{ "<leader>xx", function() require("mini.extra").pickers.diagnostic({ scope = "all" }) end,      desc = "Diagnostics" },
+			{ "<leader>xX", function() require("mini.extra").pickers.diagnostic({ scope = "current" }) end,  desc = "Buffer diagnostics" },
+			{ "<leader>cs", function() require("mini.extra").pickers.lsp({ scope = "document_symbol" }) end, desc = "Document symbols" },
+			{ "<leader>cS", function() require("mini.extra").pickers.lsp({ scope = "workspace_symbol" }) end, desc = "Workspace symbols" },
+			{ "<leader>cl", function() require("mini.extra").pickers.lsp({ scope = "definition" }) end,      desc = "LSP definitions" },
+			{ "<leader>xL", function() require("mini.extra").pickers.list({ scope = "location" }) end,        desc = "Location list" },
+			{ "<leader>xQ", function() require("mini.extra").pickers.list({ scope = "quickfix" }) end,        desc = "Quickfix list" },
+
+			-- mini.git (replaces vim-fugitive; `:Git <args>` still works)
+			{ "<leader>gb", "<cmd>Git blame -- %<cr>",                                                        desc = "Git blame (file)" },
+			{ "<leader>gl", "<cmd>Git log --oneline -n 100 -- %<cr>",                                         desc = "Git log (file)" },
+			{ "<leader>gL", "<cmd>Git log --oneline -n 100<cr>",                                              desc = "Git log (repo)" },
+			{ "<leader>gd", "<cmd>Git diff -- %<cr>",                                                         desc = "Git diff (file)" },
+			{ "<leader>gs", "<cmd>Git status<cr>",                                                            desc = "Git status" },
+			{ "<leader>gh", function() require("mini.git").show_at_cursor() end, mode = { "n", "x" },          desc = "Git show at cursor" },
+			{ "<leader>go", function() require("mini.diff").toggle_overlay(0) end,                            desc = "Toggle diff overlay" },
+
+			-- mini.files (floating navigator; oil stays on <leader>ee)
+			{
+				"<leader>ef",
+				function()
+					local mf = require("mini.files")
+					if not mf.close() then mf.open(vim.api.nvim_buf_get_name(0), false) end
+				end,
+				desc = "Toggle mini.files",
+			},
+
 			-- mini.bufremove
 			{ "<leader>bd", function() require("mini.bufremove").delete() end,                                  desc = "Delete buffer (keep window)" },
 			{ "<leader>bw", function() require("mini.bufremove").wipeout() end,                                 desc = "Wipeout buffer (keep window)" },
@@ -138,6 +166,40 @@ return {
 
 			-- Buffer remove: delete buffer without closing the window split
 			require("mini.bufremove").setup()
+
+			-- Operators: g= evaluate, cx exchange, gm multiply, gR replace with register, gs sort
+			-- (exchange/replace remapped away from gx (open URL) and gr (LSP references))
+			require("mini.operators").setup({
+				exchange = { prefix = "cx" },
+				replace = { prefix = "gR" },
+			})
+
+			-- Indent scope guide
+			require("mini.indentscope").setup({
+				symbol = "│",
+				options = { try_as_border = true },
+				draw = { delay = 50, animation = require("mini.indentscope").gen_animation.none() },
+			})
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "help", "ministarter", "minifiles", "oil", "markdown", "org", "text" },
+				callback = function() vim.b.miniindentscope_disable = true end,
+			})
+
+			-- Misc: restore cursor position when reopening a file
+			require("mini.misc").setup()
+			require("mini.misc").setup_restore_cursor()
+
+			-- Files: floating column file navigator (complements oil)
+			require("mini.files").setup({
+				windows = { preview = true, width_preview = 60 },
+				mappings = { go_in_plus = "<CR>", go_out_plus = "-" },
+			})
+
+			-- Git: :Git command, blame/log/show at cursor (replaces vim-fugitive)
+			require("mini.git").setup()
+
+			-- Tabline: buffers as tabs at the top
+			require("mini.tabline").setup()
 
 			-- Pick (replace telescope.nvim)
 			require("mini.pick").setup({
@@ -264,6 +326,14 @@ return {
 				},
 
 				clues = {
+					{ mode = "n", keys = "<Leader>a", desc = "+claude" },
+					{ mode = "x", keys = "<Leader>a", desc = "+claude" },
+					{ mode = "n", keys = "<Leader>b", desc = "+buffer" },
+					{ mode = "n", keys = "<Leader>c", desc = "+code" },
+					{ mode = "n", keys = "<Leader>e", desc = "+explorer" },
+					{ mode = "n", keys = "<Leader>f", desc = "+find" },
+					{ mode = "n", keys = "<Leader>g", desc = "+git" },
+					{ mode = "n", keys = "<Leader>x", desc = "+diagnostics/lists" },
 					miniclue.gen_clues.builtin_completion(),
 					miniclue.gen_clues.g(),
 					miniclue.gen_clues.marks(),

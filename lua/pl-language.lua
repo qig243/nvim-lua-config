@@ -1,16 +1,17 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		-- Pin to the classic `master` branch: this config uses the master API
-		-- (nvim-treesitter.configs / .install, :TSUpdate, ensure_installed).
-		-- The plugin's new default `main` branch has an incompatible API.
-		branch = "master",
-		event = { "BufReadPre", "BufNewFile" },
+		-- `main` branch: nvim 0.11+/0.12 API (the old `master` branch is frozen).
+		-- Needs the tree-sitter CLI (brew install tree-sitter-cli) + a C compiler.
+		branch = "main",
+		lazy = false,
 		priority = 1000,
 		build = ":TSUpdate",
-		opts = {
-			-- add languages
-			ensure_installed = {
+		config = function()
+			local ts = require("nvim-treesitter")
+			ts.setup({})
+
+			local ensure_installed = {
 				"bash", "query",
 				"c", "cpp",
 				"dockerfile",
@@ -19,37 +20,73 @@ return {
 				"lua", "luadoc",
 				"python",
 				"rust",
-				"go",
+				"go", "gomod", "gowork", "gosum",
 				"markdown", "markdown_inline",
 				"regex",
 				"vim", "vimdoc",
-				"yaml",
-			},
-			ignore_install = { "org" },
-			auto_install = true,
-
-			highlight = { enable = true, disable = {} },
-			indent = { enable = true },
-			rainbow = {
-				enable = true,
-				extended_mode = true,
-				max_file_lines = nil,
-			},
-		},
-		config = function(_, opts)
-			require('nvim-treesitter.install').compilers = { 'gcc' }
-			-- Merge the incremental-selection keymaps into the opts table above and
-			-- apply the whole thing (ensure_installed / highlight / indent included).
-			opts.incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "gnn", -- set to `false` to disable one of the mappings
-					node_incremental = "gnn",
-					scope_incremental = "grc",
-					node_decremental = "gnr",
-				},
+				"yaml", "toml",
+				"scala", "typst",
 			}
-			require('nvim-treesitter.configs').setup(opts)
+			local installed = {}
+			for _, lang in ipairs(ts.get_installed("parsers")) do installed[lang] = true end
+			local missing = vim.tbl_filter(function(l) return not installed[l] end, ensure_installed)
+			if #missing > 0 then ts.install(missing) end
+
+			-- Enable highlight + indent per buffer; auto-install missing parsers.
+			local function start(buf, lang)
+				if not pcall(vim.treesitter.start, buf, lang) then return end
+				vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+			end
+			vim.api.nvim_create_autocmd("FileType", {
+				group = vim.api.nvim_create_augroup("my-treesitter", { clear = true }),
+				callback = function(ev)
+					local lang = vim.treesitter.language.get_lang(ev.match)
+					if not lang or lang == "org" then return end
+					if vim.treesitter.language.add(lang) then
+						start(ev.buf, lang)
+					elseif vim.list_contains(ts.get_available(), lang) then
+						ts.install({ lang }):await(function()
+							if vim.api.nvim_buf_is_valid(ev.buf) then start(ev.buf, lang) end
+						end)
+					end
+				end,
+			})
+
+			-- Incremental selection (gnn = start/expand, gnr = shrink), replaces the
+			-- removed `incremental_selection` module from the master branch.
+			local sel_stack = {}
+			local function select_node(node)
+				local sr, sc, er, ec = node:range()
+				if ec == 0 then er, ec = er - 1, math.huge end
+				vim.api.nvim_win_set_cursor(0, { sr + 1, sc })
+				vim.cmd("normal! v")
+				vim.api.nvim_win_set_cursor(0, { er + 1, math.max(ec - 1, 0) })
+			end
+			local function ts_expand()
+				local in_visual = vim.fn.mode():match("[vV]") ~= nil
+				if not in_visual then sel_stack = {} end
+				local node
+				if in_visual and #sel_stack > 0 then
+					node = sel_stack[#sel_stack]:parent()
+					vim.cmd("normal! \27")
+				else
+					node = vim.treesitter.get_node()
+				end
+				while node and #sel_stack > 0 and vim.deep_equal({ node:range() }, { sel_stack[#sel_stack]:range() }) do
+					node = node:parent()
+				end
+				if not node then return end
+				table.insert(sel_stack, node)
+				select_node(node)
+			end
+			local function ts_shrink()
+				if #sel_stack <= 1 then return end
+				table.remove(sel_stack)
+				vim.cmd("normal! \27")
+				select_node(sel_stack[#sel_stack])
+			end
+			vim.keymap.set({ "n", "x" }, "gnn", ts_expand, { desc = "TS: expand selection" })
+			vim.keymap.set("x", "gnr", ts_shrink, { desc = "TS: shrink selection" })
 		end,
 	},
 	{ -- golang
@@ -120,7 +157,7 @@ return {
 	},
 	{
 		"scalameta/nvim-metals",
-		ft = { "scala" },
+		ft = { "scala", "sbt" },
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"mfussenegger/nvim-dap",
@@ -134,6 +171,14 @@ return {
 				excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
 			}
 			metals_config.capabilities = require("blink.cmp").get_lsp_capabilities()
+
+			vim.api.nvim_create_autocmd("FileType", {
+				group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
+				pattern = { "scala", "sbt" },
+				callback = function() require("metals").initialize_or_attach(metals_config) end,
+			})
+			-- Attach to the buffer that triggered the ft-load as well
+			require("metals").initialize_or_attach(metals_config)
 		end
 	},
 	{
