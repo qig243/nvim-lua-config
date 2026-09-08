@@ -179,7 +179,7 @@ return {
 				local found = vim.fs.find({ ".git" }, {
 					upward = true,
 					path = vim.fn.getcwd(),
-					stop = vim.uv.os_homedir(),
+					stop = (vim.uv or vim.loop).os_homedir(),
 				})
 				if found[1] then return vim.fs.dirname(found[1]) end
 				return vim.fn.getcwd()

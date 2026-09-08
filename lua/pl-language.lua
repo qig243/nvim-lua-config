@@ -25,7 +25,13 @@ return {
 			vim.api.nvim_create_autocmd("FileType", {
 				callback = function(args)
 					local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
-					if lang and pcall(vim.treesitter.language.add, lang) then
+					-- language.add() returns (true) on success or (nil, err) on
+					-- failure without throwing, so pcall alone always succeeds;
+					-- check its first return value too. This avoids erroring on
+					-- buffers whose filetype has no installed parser (e.g. the
+					-- "lazy" UI window).
+					local ok, added = pcall(vim.treesitter.language.add, lang)
+					if lang and ok and added then
 						vim.treesitter.start(args.buf, lang)
 						vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
 					end
