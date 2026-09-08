@@ -73,12 +73,25 @@ return {
 			view = { side = "left", width = 32, preserve_window_proportions = true },
 			renderer = {
 				group_empty = true,
-				highlight_git = true,
+				highlight_git = "name",
 				indent_markers = { enable = true },
-				icons = { git_placement = "after" },
+				icons = {
+					-- git status icon in its own column before the name (like
+					-- coc-explorer); folders show the status of their contents
+					git_placement = "before",
+					show = { file = true, folder = true, folder_arrow = true, git = true },
+					glyphs = {
+						git = {
+							unstaged = "M", staged = "S", unmerged = "U", renamed = "R",
+							untracked = "?", deleted = "D", ignored = "-",
+						},
+					},
+				},
 			},
+			-- dotfiles stay visible, but the .git dir is never listed (vim regex
+			-- on the basename, so nested worktrees / submodules hide too)
 			filters = { dotfiles = false, git_ignored = false, custom = { "^\\.git$" } },
-			git = { enable = true, ignore = false },
+			git = { enable = true, ignore = false, show_on_dirs = true, show_on_open_dirs = true },
 			actions = {
 				change_dir = { enable = false },
 				open_file = { quit_on_open = false, resize_window = true },
